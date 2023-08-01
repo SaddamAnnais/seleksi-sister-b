@@ -105,6 +105,7 @@ namespace My1sotosop {
 			this->title = (gcnew System::Windows::Forms::Label());
 			this->splitContainer1 = (gcnew System::Windows::Forms::SplitContainer());
 			this->panel1 = (gcnew System::Windows::Forms::Panel());
+			this->edge_detection = (gcnew System::Windows::Forms::RadioButton());
 			this->boxBlur = (gcnew System::Windows::Forms::RadioButton());
 			this->camera_status = (gcnew System::Windows::Forms::CheckBox());
 			this->filter_button = (gcnew System::Windows::Forms::Button());
@@ -122,7 +123,6 @@ namespace My1sotosop {
 			this->output_title = (gcnew System::Windows::Forms::Label());
 			this->backgroundWorker1 = (gcnew System::ComponentModel::BackgroundWorker());
 			this->backgroundWorker2 = (gcnew System::ComponentModel::BackgroundWorker());
-			this->edge_detection = (gcnew System::Windows::Forms::RadioButton());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->splitContainer1))->BeginInit();
 			this->splitContainer1->Panel1->SuspendLayout();
 			this->splitContainer1->Panel2->SuspendLayout();
@@ -139,9 +139,9 @@ namespace My1sotosop {
 				static_cast<System::Byte>(0)));
 			this->title->Location = System::Drawing::Point(253, 9);
 			this->title->Name = L"title";
-			this->title->Size = System::Drawing::Size(455, 66);
+			this->title->Size = System::Drawing::Size(454, 66);
 			this->title->TabIndex = 0;
-			this->title->Text = L"Image FIlter using CUDA";
+			this->title->Text = L"Image Filter using CUDA";
 			// 
 			// splitContainer1
 			// 
@@ -184,6 +184,20 @@ namespace My1sotosop {
 			this->panel1->Name = L"panel1";
 			this->panel1->Size = System::Drawing::Size(300, 447);
 			this->panel1->TabIndex = 0;
+			// 
+			// edge_detection
+			// 
+			this->edge_detection->AutoSize = true;
+			this->edge_detection->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 10.2F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->edge_detection->Location = System::Drawing::Point(27, 312);
+			this->edge_detection->Name = L"edge_detection";
+			this->edge_detection->Size = System::Drawing::Size(184, 24);
+			this->edge_detection->TabIndex = 13;
+			this->edge_detection->TabStop = true;
+			this->edge_detection->Text = L"sobel edge detection";
+			this->edge_detection->UseVisualStyleBackColor = true;
+			this->edge_detection->CheckedChanged += gcnew System::EventHandler(this, &MyForm::edge_detection_CheckedChanged);
 			// 
 			// boxBlur
 			// 
@@ -381,20 +395,6 @@ namespace My1sotosop {
 			// 
 			this->backgroundWorker2->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(this, &MyForm::backgroundWorker2_DoWork);
 			// 
-			// edge_detection
-			// 
-			this->edge_detection->AutoSize = true;
-			this->edge_detection->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 10.2F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
-				static_cast<System::Byte>(0)));
-			this->edge_detection->Location = System::Drawing::Point(27, 312);
-			this->edge_detection->Name = L"edge_detection";
-			this->edge_detection->Size = System::Drawing::Size(184, 24);
-			this->edge_detection->TabIndex = 13;
-			this->edge_detection->TabStop = true;
-			this->edge_detection->Text = L"sobel edge detection";
-			this->edge_detection->UseVisualStyleBackColor = true;
-			this->edge_detection->CheckedChanged += gcnew System::EventHandler(this, &MyForm::edge_detection_CheckedChanged);
-			// 
 			// MyForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
@@ -505,6 +505,10 @@ private: System::Void filter_button_Click(System::Object^ sender, System::EventA
 private: System::Void processImage() {
 	msclr::interop::marshal_context context;
 	std::string path_now = context.marshal_as<std::string>(file_path);
+
+	//if (path_now == nullptr) {
+	//	MessageBox::Show("Camera won't open!", "Error", MessageBoxButtons::OK, MessageBoxIcon::Error);
+	//}
 
 	cv::Mat input_image = cv::imread(path_now);
 	cv::Mat shown_image(input_image.size(), CV_8UC3);
