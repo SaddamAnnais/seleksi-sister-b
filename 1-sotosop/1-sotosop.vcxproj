@@ -90,7 +90,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>cudart.lib;opencv_world480d.lib</AdditionalDependencies>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <EntryPointSymbol>main</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
@@ -119,6 +119,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>cudart.lib;opencv_world480d.lib</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -143,6 +144,8 @@
     <ClInclude Include="contrast.cuh" />
     <ClInclude Include="filter.hpp" />
     <ClInclude Include="grayscale.cuh" />
+    <ClInclude Include="boxBlur.cuh" />
+    <ClInclude Include="sobel_detection.cuh" />
     <ClInclude Include="image_io.hpp" />
     <ClInclude Include="MyForm.h">
       <FileType>CppForm</FileType>
@@ -156,10 +159,12 @@
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="contrast.cu" />
+    <CudaCompile Include="boxBlur.cu" />
+    <CudaCompile Include="sobel_detection.cu" />
     <CudaCompile Include="filter.cpp" />
     <CudaCompile Include="grayscale.cu" />
-    <CudaCompile Include="kernel.cpp" />
     <CudaCompile Include="saturation.cu" />
+    <CudaCompile Include="test.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

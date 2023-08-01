@@ -41,6 +41,10 @@
     <ClInclude Include="saturation.cuh">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="boxBlur.cuh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sobel_detection.cuh" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="contrast.cu">
@@ -49,14 +53,18 @@
     <CudaCompile Include="grayscale.cu">
       <Filter>Source Files</Filter>
     </CudaCompile>
-    <CudaCompile Include="kernel.cpp">
-      <Filter>Source Files</Filter>
-    </CudaCompile>
     <CudaCompile Include="saturation.cu">
       <Filter>Source Files</Filter>
     </CudaCompile>
     <CudaCompile Include="filter.cpp">
       <Filter>Source Files</Filter>
     </CudaCompile>
+    <CudaCompile Include="boxBlur.cu">
+      <Filter>Source Files</Filter>
+    </CudaCompile>
+    <CudaCompile Include="test.cu">
+      <Filter>Source Files</Filter>
+    </CudaCompile>
+    <CudaCompile Include="sobel_detection.cu" />
   </ItemGroup>
 </Project>

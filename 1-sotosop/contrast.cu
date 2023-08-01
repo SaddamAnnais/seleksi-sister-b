@@ -24,32 +24,21 @@ __global__ void contrast_device(uchar3* input, uchar3* output, int width, int he
     }
 }
 
-void contrast_host(Mat& image, string path, int c) {
-    // Allocate memory on the GPU
-    uchar3* d_input;
-    uchar3* d_output;
-    cudaMalloc(&d_input, image.cols * image.rows * sizeof(uchar3));
-    cudaMalloc(&d_output, image.cols * image.rows * sizeof(uchar3));
+void contrast_host(Mat& input_image, Mat& output_image, uchar3* d_input, uchar3* d_output, string path, int c, bool save) {
 
     // Copy the input image to the GPU
-    cudaMemcpy(d_input, image.ptr<uchar3>(), image.cols * image.rows * sizeof(uchar3), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_input, input_image.ptr<uchar3>(), input_image.cols * input_image.rows * sizeof(uchar3), cudaMemcpyHostToDevice);
 
     // Define the CUDA kernel launch parameters
     dim3 blockDim(32, 32);
-    dim3 gridDim((image.cols + blockDim.x - 1) / blockDim.x, (image.rows + blockDim.y - 1) / blockDim.y);
+    dim3 gridDim((input_image.cols + blockDim.x - 1) / blockDim.x, (input_image.rows + blockDim.y - 1) / blockDim.y);
 
     // Launch the CUDA kernel to apply the contrast filter
-    contrast_device << <gridDim, blockDim >> > (d_input, d_output, image.cols, image.rows, c);
+    contrast_device << <gridDim, blockDim >> > (d_input, d_output, input_image.cols, input_image.rows, c);
 
     // Copy the output image from the GPU
-    Mat output_buffer(image.rows, image.cols, CV_8UC3);
-    cudaMemcpy(output_buffer.ptr<uchar3>(), d_output, image.cols * image.rows * sizeof(uchar3), cudaMemcpyDeviceToHost);
+    cudaMemcpy(output_image.ptr<uchar3>(), d_output, input_image.cols * input_image.rows * sizeof(uchar3), cudaMemcpyDeviceToHost);
 
     // Save the output image to disk
-    saveImage(path, output_buffer, "_" + to_string(c) + "_contrast");
-    output_buffer.copyTo(image);
-
-    // Free memory on the GPU
-    cudaFree(d_input);
-    cudaFree(d_output);
+    if (save) saveImage(path, output_image, "_" + to_string(c) + "_contrast");
 }

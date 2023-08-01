@@ -16,7 +16,7 @@ void saveImage(const std::string& path, cv::Mat& image, const std::string text) 
     if (!cv::imwrite(output_path, image)) std::cerr << "Failed to save image: " << path << std::endl;
     else {
         std::cout << text << " image is saved successfully\n";
-        std::cout << "Saved contrast image to " << output_path << std::endl;
+        std::cout << "Saved image to " << output_path << std::endl;
     }
 }
 
