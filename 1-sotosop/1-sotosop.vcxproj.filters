@@ -62,9 +62,6 @@
     <CudaCompile Include="boxBlur.cu">
       <Filter>Source Files</Filter>
     </CudaCompile>
-    <CudaCompile Include="test.cu">
-      <Filter>Source Files</Filter>
-    </CudaCompile>
     <CudaCompile Include="sobel_detection.cu" />
   </ItemGroup>
 </Project>

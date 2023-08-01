@@ -165,7 +165,6 @@
     <CudaCompile Include="filter.cpp" />
     <CudaCompile Include="grayscale.cu" />
     <CudaCompile Include="saturation.cu" />
-    <CudaCompile Include="test.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
