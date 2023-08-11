@@ -29,7 +29,7 @@ def read_txt_file(file_path):
         lines = file.readlines()
 
     # Extract the first integer
-    first_integer = int(lines[0])
+    first_integer = int(lines[0]) + 1
 
     # Extract the pairs of integers and split them into two separate lists
     pairs = [line.split() for line in lines[1:]]
