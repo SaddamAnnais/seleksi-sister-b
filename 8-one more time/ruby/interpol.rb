@@ -28,7 +28,7 @@ def read_txt_file(file_path)
     # Read the remaining lines
     file.each_line do |line|
       # Split the line into two integers
-      values = line.split.map(&:to_i)
+      values = line.split.map(&:to_f)
       array1 << values[0]
       array2 << values[1]
     end
