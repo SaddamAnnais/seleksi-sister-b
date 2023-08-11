@@ -3,8 +3,8 @@ Simple program to predict the polynom of the given point using least squares
 
 ## Requirement
 Each installation tutorial is on the link.
-- [Python 3](https://www.python.org/downloads/)
-- [NumPy](https://pypi.org/project/numpy/)
+- [Python 3]([https://www.python.org/downloads/](https://go.dev/doc/install))
+- [Go]([https://pypi.org/project/numpy/](https://pkg.go.dev/gonum.org/v1/gonum/mat))
 
 ## Input and Output
 ### Input File Format
@@ -23,6 +23,8 @@ Each line correspond to the power of the x. So the first line is x^0, the second
 1.0
 2.0
 ```
+
+## How to Run
 
 ```Python
 python './python 3/interpol.py'
