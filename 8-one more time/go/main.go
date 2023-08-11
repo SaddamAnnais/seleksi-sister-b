@@ -123,7 +123,7 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Scan()
 	filePath := scanner.Text()
-	
+
 	degree, x, y, err := readTextFile(filePath)
 	if err != nil {
 		log.Fatal(err)
@@ -143,5 +143,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println("Polynomial equation is written to file successfully to " + parentDir)
+	fmt.Println("Polynomial equation is written to file successfully to " + parentDir  + "\\output.txt")
 }
