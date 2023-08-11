@@ -28,4 +28,10 @@ Each line correspond to the power of the x. So the first line is x^0, the second
 python './python 3/interpol.py'
 
 ```
-![image](https://github.com/SaddamAnnais/seleksi-sister-b/assets/85011841/4099ebc4-c478-4f8d-870b-fae063076dbc)
+
+## Example 
+```
+Enter the file: ./test/1.txt
+Polynomial coefficients: [3. 1. 2.]
+List contents successfully written to ./test/output.txt
+```
