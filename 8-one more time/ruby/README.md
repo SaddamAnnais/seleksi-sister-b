@@ -22,7 +22,7 @@ Each line correspond to the power of the x. So the first line is x^0, the second
 1/1
 2/1
 ```
-
+## How to Run
 ```Ruby
 ruby ./ruby/interpol.rb 
 
